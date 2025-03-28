@@ -2,6 +2,7 @@ package org.github.bodemiller.karrangement
 
 import org.github.bodemiller.karrangement.util.Files
 import java.io.File
+import java.nio.charset.Charset
 import java.util.logging.Logger
 
 /**
@@ -82,23 +83,32 @@ abstract class Config(
             return false
         }
 
-        val reader = resourceClazz.getResourceAsStream("/${file.name}")?.reader()
+        kotlin.runCatching {
+            val url = resourceClazz.classLoader.getResource(file.name)
 
-        if (reader != null) {
-            val lines = reader.readLines()
+            if (url == null) {
+                logger.warning("[Arrangement] Failed to find configuration file: ${file.name}")
+                return false;
+            }
 
-            // Create the file... it doesn't exist yet!
-            if (!file.createNewFile()){
-                logger.info("[Arrangement] Failed to create file for: ${file.name}")
+            val connection = url.openConnection()
+            connection.useCaches = false
+            val lines = connection.getInputStream().reader(Charset.defaultCharset()).readLines()
+
+            if (!file.createNewFile()) {
+                logger.warning("[Arrangement] Failed to create file for: ${file.name}")
                 return false
             }
+
             Files.write(lines.formString(), file)
-            load() // We will now load it since it shouldn't of loaded before.
+            load() // Configuration shouldn't of been loaded yet.
             save()
-            logger.info("[Arrangement] Created file from default...")
+            logger.info("[Arrangement] Created file from default for: ${file.name}")
             return true
+        }.onFailure {
+            logger.warning("[Arrangement] Failed to find configuration file: ${file.name}")
         }
-        logger.info("[Arrangement] Failed to find configuration file: ${file.name}")
+        logger.warning("[Arrangement] Failed to find configuration file: ${file.name}")
         return false
     }
 

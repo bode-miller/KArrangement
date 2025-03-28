@@ -11,7 +11,7 @@ class JsonConfigTest {
     @Test
     fun configTest() {
         val config = JsonConfig(
-            File(""),
+            File("path"),
             Logger.getLogger("Arrangement"),
             JsonConfigTest::class.java,
             reloadable = false,

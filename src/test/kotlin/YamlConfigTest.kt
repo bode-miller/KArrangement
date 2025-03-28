@@ -11,13 +11,13 @@ class YamlConfigTest {
     @Test
     fun configTest() {
         val config = YamlConfig(
-            File("C:\\Users\\s1025\\Desktop\\old-dev\\Dissolve\\KArrangment\\src\\test\\kotlin\\impls\\yaml-arrangement.yaml"),
+            File("path"),
             Logger.getLogger("Arrangement"),
             JsonConfigTest::class.java,
             reloadable = false,
             GsonBuilder().setPrettyPrinting().create()
         )
-        config.load()
+        //config.load()
         /*config.set("gamer.lol.gamer", true)
         config.set("boom", false)
         config.set("gameing.lol.daf", 1)
