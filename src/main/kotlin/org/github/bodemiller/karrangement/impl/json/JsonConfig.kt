@@ -11,6 +11,12 @@ import java.util.logging.Logger
 
 /**
  * @author Bode Miller
+ *
+ * TODO:
+ *  - Add options to not store already searched elements in a map.
+ *      Since some people won't wanna use more memory to keep elements
+ *      stored in more memory and rather use the overhead on the
+ *      JsonConfig#findValue method, then let it be.
  */
 class JsonConfig(
     file: File,
@@ -46,16 +52,14 @@ class JsonConfig(
     override fun set(path: String, value: Any) {
         val cachedElement = elementAt[path]
 
+        // Don't allow us to set if we already have
+        // a cached value of same value.
         if (cachedElement != null && cachedElement == value) {
             return
         }
 
-        val pathArray = arrayListOf<String>()
-        pathArray.addAll(path.split(".").toList())
-        val valueField = pathArray[pathArray.size - 1]
-
-        // Remove field value...
-        pathArray.removeAt(pathArray.size - 1)
+        val pathArray = path.split(".").toMutableList()
+        val valueField = pathArray.removeAt(pathArray.size - 1) // Remove value field.
 
         var currentMember: JsonElement? = null
 
@@ -148,7 +152,6 @@ class JsonConfig(
         if (currentMember != null) {
             elementAt[path] = currentMember
         }
-
         return currentMember
     }
 

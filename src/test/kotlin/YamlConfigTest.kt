@@ -15,9 +15,12 @@ class YamlConfigTest {
             Logger.getLogger("Arrangement"),
             JsonConfigTest::class.java,
             reloadable = false,
-            GsonBuilder().setPrettyPrinting().create()
+            GsonBuilder().setPrettyPrinting().create()w
         )
-        //config.load()
+        config.load()
+        config.set("gaming.settings.gamer", true)
+        println("Gamers Game LOL?? : ${config.getBoolean("3")}")
+        config.save()
         /*config.set("gamer.lol.gamer", true)
         config.set("boom", false)
         config.set("gameing.lol.daf", 1)
