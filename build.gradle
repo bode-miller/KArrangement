@@ -1,0 +1,22 @@
+plugins {
+    id 'maven-publish'
+    id 'org.jetbrains.kotlin.jvm' version '2.1.10'
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
+group = "org.github.bodemiller.karrangement"
+version = "0.0.1"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    implementation 'com.google.code.gson:gson:2.9.0'
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
