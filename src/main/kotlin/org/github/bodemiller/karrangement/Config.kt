@@ -19,8 +19,6 @@ abstract class Config(
         // Auto check if we can create all directory's
         if (file.parentFile != null && file.parentFile.mkdirs()) {
             logger.info("[Arrangement] Created directory for ${file.name} (${file.absolutePath})")
-        } else {
-            logger.info("[Arrangement] Failed to create directory for ${file.name}... Already created?")
         }
     }
 
@@ -79,7 +77,6 @@ abstract class Config(
         // Do we really want to reset the configuration every restart? No.
         // This is how we combat that!
         if (file.exists()) {
-            logger.info("[Arrangement] Couldn't save default since the file already exist!")
             return false
         }
 
@@ -138,6 +135,5 @@ abstract class Config(
         }
         return builder.toString()
     }
-
 
 }

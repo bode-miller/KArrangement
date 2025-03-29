@@ -1,6 +1,7 @@
 package org.github.bodemiller.karrangement.impl.json
 
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -23,7 +24,7 @@ class JsonConfig(
     logger: Logger,
     resourceClazz: Class<*>,
     reloadable: Boolean,
-    private val serializer: Gson,
+    private var serializer: Gson = GsonBuilder().create(),
 ) : Config(file, logger, resourceClazz, reloadable) {
 
     private lateinit var config: JsonObject
@@ -197,5 +198,7 @@ class JsonConfig(
         super.reload()
         elementAt.clear()
     }
+
+    fun serializer(serializer: Gson): JsonConfig = this.apply { this.serializer = serializer }
 
 }

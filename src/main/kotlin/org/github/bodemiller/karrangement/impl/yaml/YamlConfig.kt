@@ -6,6 +6,7 @@ import org.github.bodemiller.karrangement.impl.yaml.representer.YamlRepresenter
 import org.github.bodemiller.karrangement.impl.yaml.section.YamlSection
 import org.github.bodemiller.karrangement.util.Files
 import org.yaml.snakeyaml.DumperOptions
+import org.yaml.snakeyaml.DumperOptions.FlowStyle
 import org.yaml.snakeyaml.Yaml
 import java.io.File
 import java.util.logging.Logger
@@ -15,20 +16,22 @@ import kotlin.math.log
  * @author Bode Miller
  *
  * TODO:
- *  - Allow dumper options to be provided, and loader options.
  *  - Allow comments to be added to fields?
+ *  - Allow automatic storing of values? (Optional)
  */
 class YamlConfig(
     file: File,
     logger: Logger,
     resourceClazz: Class<*>,
-    reloadable: Boolean,
-    private val serializer: Gson
+    reloadable: Boolean
 ) : Config(file, logger, resourceClazz, reloadable) {
+
+    private var dumperOptions = DumperOptions() // Our Yaml's dumper options.
+    private var representer = YamlRepresenter(dumperOptions, FlowStyle.BLOCK) // our representer for YamlSection's
 
     // We use snakeyaml to load and save all
     // our saved values, with our system.
-    private val yaml = Yaml(YamlRepresenter(), DumperOptions());
+    private var yaml = Yaml(representer, dumperOptions)
 
     // Current Yaml Section, Basically is the master
     // section for us to handle with, everything, all values
@@ -79,6 +82,9 @@ class YamlConfig(
         valuesSection.entries[valueField] = value
     }
 
+    /**
+     * Finds the next section possible
+     */
     private fun findNextSection(section: YamlSection, path: String): YamlSection {
         val foundEntry = section.entries[path]
 
@@ -105,6 +111,8 @@ class YamlConfig(
 
         var currentSection: YamlSection? = null
 
+        // Loop the array of path members and find the
+        // next YamlSection
         for (member in pathArray) {
             if (currentSection == null) {
                 currentSection = findNextSection(section, member)
@@ -120,8 +128,7 @@ class YamlConfig(
     }
 
     override fun save() {
-        println()
-        Files.write(yaml.dump(section), file)
+        Files.write(this.dump(), file)
     }
 
     override fun load() {
@@ -130,6 +137,8 @@ class YamlConfig(
             this.section.populateEntries(
                 yaml.load<Map<String, Any>>(file.reader())
             )
+
+            logger.info("[Arrangement] Loaded ${file.name} configuration")
         }.onFailure {
             logger.warning("[Arrangement] Failed to load Yaml Section entries. Backup and check file for corruption. (${file.name})")
         }
@@ -139,6 +148,31 @@ class YamlConfig(
         // Get rid of our memory we're reloading!
         section.entries.clear()
         super.reload()
+    }
+
+    /**
+     * Creates a String of all dumped information, this method is used to
+     * save the configuration file.
+     */
+    fun dump(): String {
+        return this.yaml.dump(section)
+    }
+
+    /**
+     * Changes the flow style the representer uses, defaults to BLOCK.
+     */
+    fun flowStyle(style: FlowStyle): YamlConfig = this.apply {
+        this.representer = YamlRepresenter(dumperOptions, style)
+        this.yaml = Yaml(representer, dumperOptions)
+    }
+
+    /**
+     * Allows edits to be done to the dumper allowing changes of indents sizes etc.
+     */
+    fun dumperOptions(dumperOptions: DumperOptions): YamlConfig = this.apply {
+        this.dumperOptions =  dumperOptions
+        this.representer = YamlRepresenter(dumperOptions, representer.flowStyle)
+        this.yaml = Yaml(representer, dumperOptions)
     }
 
 }
