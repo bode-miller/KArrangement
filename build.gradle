@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "org.github.bodemiller.karrangement"
-version = "0.0.1"
+version = "0.0.2"
 
 repositories {
     mavenCentral()
@@ -17,6 +17,25 @@ dependencies {
 
     implementation("org.yaml:snakeyaml:2.4")
     implementation 'com.google.code.gson:gson:2.9.0'
+}
+
+shadowJar {
+    archiveClassifier.set("")
+
+    exclude "**/*.kotlin_builtins"
+    exclude "**/*.kotlin_metadata"
+
+    archiveFileName.set(
+            "karrangement.jar"
+    )
+}
+
+publishing {
+    publications {
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
+        }
+    }
 }
 
 tasks.test {

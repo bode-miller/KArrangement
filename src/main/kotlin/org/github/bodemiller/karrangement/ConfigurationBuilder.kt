@@ -19,6 +19,8 @@ class ConfigurationBuilder(val type: ConfigurationType) {
     private var reloadable: Boolean = false // files are not reloadable by default
 
     companion object {
+
+        @JvmStatic
         fun of(type: ConfigurationType): ConfigurationBuilder {
             return ConfigurationBuilder(type)
         }
