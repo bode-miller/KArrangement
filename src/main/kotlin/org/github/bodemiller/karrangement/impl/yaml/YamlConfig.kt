@@ -5,6 +5,7 @@ import org.github.bodemiller.karrangement.Config
 import org.github.bodemiller.karrangement.impl.yaml.representer.YamlRepresenter
 import org.github.bodemiller.karrangement.impl.yaml.section.YamlSection
 import org.github.bodemiller.karrangement.util.Files
+import org.github.bodemiller.karrangement.util.ValueConverter
 import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.DumperOptions.FlowStyle
 import org.yaml.snakeyaml.Yaml
@@ -45,7 +46,7 @@ class YamlConfig(
 
     override fun getInt(path: String): Int? {
         val foundValue = findValue(path) ?: return null
-        return foundValue as Int
+        return ValueConverter.convertInt(foundValue)
     }
 
     override fun getBoolean(path: String): Boolean? {
