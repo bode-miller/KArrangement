@@ -8,7 +8,9 @@ import java.net.URLDecoder
  */
 object Files {
     fun read(file: File, lambda: (BufferedReader) -> Unit) {
-        lambda.invoke(BufferedReader(FileReader(file)))
+        val reader = BufferedReader(FileReader(file))
+        lambda.invoke(reader)
+        reader.close()
     }
 
     fun write(str: String, file: File) {
