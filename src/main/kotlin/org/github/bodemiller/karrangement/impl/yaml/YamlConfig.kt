@@ -1,6 +1,5 @@
 package org.github.bodemiller.karrangement.impl.yaml
 
-import com.google.gson.Gson
 import org.github.bodemiller.karrangement.Config
 import org.github.bodemiller.karrangement.impl.yaml.representer.YamlRepresenter
 import org.github.bodemiller.karrangement.impl.yaml.section.YamlSection
@@ -11,14 +10,9 @@ import org.yaml.snakeyaml.DumperOptions.FlowStyle
 import org.yaml.snakeyaml.Yaml
 import java.io.File
 import java.util.logging.Logger
-import kotlin.math.log
 
 /**
  * @author Bode Miller
- *
- * TODO:
- *  - Allow comments to be added to fields?
- *  - Allow automatic storing of values? (Optional)
  */
 class YamlConfig(
     file: File,
@@ -30,6 +24,8 @@ class YamlConfig(
     private var dumperOptions = DumperOptions() // Our Yaml's dumper options.
     private var representer = YamlRepresenter(dumperOptions, FlowStyle.BLOCK) // our representer for YamlSection's
 
+    private val storedValues = HashMap<String, Any>()
+
     // We use snakeyaml to load and save all
     // our saved values, with our system.
     private var yaml = Yaml(representer, dumperOptions)
@@ -38,6 +34,10 @@ class YamlConfig(
     // section for us to handle with, everything, all values
     // are ran through this section.
     private val section: YamlSection = YamlSection();
+
+    init {
+        dumperOptions.isProcessComments = true
+    }
 
     override fun getString(path: String): String? {
         val foundValue = findValue(path) ?: return null
@@ -80,6 +80,7 @@ class YamlConfig(
             logger.warning("[Arrangement] Failed to set $path to its set value of $value because no section was found!")
             return
         }
+        storedValues[path] = value
         valuesSection.entries[valueField] = value
     }
 
@@ -107,6 +108,10 @@ class YamlConfig(
     }
 
     private fun findValue(path: String): Any? {
+        if (storedValues.containsKey(path)) {
+            return storedValues[path]
+        }
+
         val pathArray = path.split(".").toMutableList()
         val valueField = pathArray.removeAt(pathArray.size - 1)
 
@@ -123,7 +128,9 @@ class YamlConfig(
         }
 
         if (currentSection != null) {
-            return currentSection.entries[valueField]
+            val value = currentSection.entries[valueField]
+            storedValues[path] = value!!
+            return value
         }
         return null
     }
@@ -148,6 +155,7 @@ class YamlConfig(
     override fun reload() {
         // Get rid of our memory we're reloading!
         section.entries.clear()
+        this.storedValues.clear()
         super.reload()
     }
 
@@ -172,6 +180,7 @@ class YamlConfig(
      */
     fun dumperOptions(dumperOptions: DumperOptions): YamlConfig = this.apply {
         this.dumperOptions =  dumperOptions
+        this.dumperOptions.isProcessComments = true
         this.representer = YamlRepresenter(dumperOptions, representer.flowStyle)
         this.yaml = Yaml(representer, dumperOptions)
     }
