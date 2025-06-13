@@ -24,7 +24,7 @@ class YamlConfig(
     private var dumperOptions = DumperOptions() // Our Yaml's dumper options.
     private var representer = YamlRepresenter(dumperOptions, FlowStyle.BLOCK) // our representer for YamlSection's
 
-    private val storedValues = HashMap<String, Any>()
+    private val storedValues = HashMap<String, Any?>()
 
     // We use snakeyaml to load and save all
     // our saved values, with our system.
@@ -41,7 +41,7 @@ class YamlConfig(
 
     override fun getString(path: String): String? {
         val foundValue = findValue(path) ?: return null
-        return foundValue as String
+        return ValueConverter.convertToString(foundValue)
     }
 
     override fun getInt(path: String): Int? {
@@ -129,7 +129,7 @@ class YamlConfig(
 
         if (currentSection != null) {
             val value = currentSection.entries[valueField]
-            storedValues[path] = value!!
+            storedValues[path] = value
             return value
         }
         return null

@@ -16,4 +16,10 @@ object ValueConverter {
         else -> null
     }
 
+    fun convertToString(value: Any): String? = when (value) {
+        is String -> value
+        is Number -> value.toString()
+        else -> null
+    }
+
 }
